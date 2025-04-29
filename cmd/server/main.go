@@ -15,13 +15,18 @@ func formatJSONHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Printf("Error closing request body from %s: %v", r.RemoteAddr, err)
+		}
+	}(r.Body)
 	bodyBytes, err := io.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, "Error reading request body", http.StatusInternalServerError)
 		log.Printf("Error reading body from %s: %v", r.RemoteAddr, err)
 		return
 	}
-	defer r.Body.Close()
 
 	if len(bodyBytes) == 0 {
 		http.Error(w, "Empty request body", http.StatusBadRequest)
