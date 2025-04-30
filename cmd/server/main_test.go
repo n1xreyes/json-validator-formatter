@@ -184,33 +184,3 @@ func TestFormatJSONHandler(t *testing.T) {
 		})
 	}
 }
-
-// Helper function to compare JSON bodies ignoring formatting and key order (alternative approach)
-// Not strictly needed if using reflect.DeepEqual as above, but good to know.
-func compareJSON(t *testing.T, actual []byte, expected string) bool {
-	t.Helper() // Marks this as a test helper function
-
-	var actualJSON, expectedJSON interface{}
-
-	err := json.Unmarshal(actual, &actualJSON)
-	if err != nil {
-		t.Errorf("Failed to unmarshal actual JSON: %v\nBody: %s", err, string(actual))
-		return false
-	}
-
-	err = json.Unmarshal([]byte(expected), &expectedJSON)
-	if err != nil {
-		t.Errorf("Failed to unmarshal expected JSON: %v\nBody: %s", err, expected)
-		return false
-	}
-
-	return reflect.DeepEqual(actualJSON, expectedJSON)
-}
-
-// Example usage of compareJSON (if not using direct DeepEqual in main test)
-// if tc.expectJSONResponse && tc.expectedStatusCode == http.StatusOK {
-//     if !compareJSON(t, rr.Body.Bytes(), tc.expectedBody) {
-//         t.Errorf("handler returned unexpected body structure:\ngot:\n%s\nwant:\n%s",
-//             rr.Body.String(), tc.expectedBody)
-//     }
-// }
