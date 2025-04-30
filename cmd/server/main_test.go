@@ -12,14 +12,13 @@ import (
 
 // TestFormatJSONHandler covers various scenarios for the formatJSONHandler.
 func TestFormatJSONHandler(t *testing.T) {
-	// Define test cases using a table-driven approach
 	testCases := []struct {
-		name               string // Name of the test case
-		method             string // HTTP method (POST, GET, etc.)
-		inputBody          string // JSON string input in the request body
-		expectedStatusCode int    // Expected HTTP status code
-		expectedBody       string // Expected pretty-printed JSON string (or error message)
-		expectJSONResponse bool   // Whether the response body should be valid JSON
+		name               string
+		method             string
+		inputBody          string
+		expectedStatusCode int
+		expectedBody       string
+		expectJSONResponse bool
 	}{
 		{
 			name:               "Valid JSON - Simple",
@@ -87,7 +86,7 @@ func TestFormatJSONHandler(t *testing.T) {
 		{
 			name:               "Incorrect Method - GET",
 			method:             http.MethodGet,
-			inputBody:          `{"key":"value"}`, // Body ignored for GET test
+			inputBody:          `{"key":"value"}`,
 			expectedStatusCode: http.StatusMethodNotAllowed,
 			expectedBody:       "Invalid request method. Only POST is allowed.",
 			expectJSONResponse: false,
@@ -95,17 +94,15 @@ func TestFormatJSONHandler(t *testing.T) {
 		{
 			name:               "Incorrect Method - PUT",
 			method:             http.MethodPut,
-			inputBody:          `{"key":"value"}`, // Body ignored for PUT test
+			inputBody:          `{"key":"value"}`,
 			expectedStatusCode: http.StatusMethodNotAllowed,
 			expectedBody:       "Invalid request method. Only POST is allowed.",
 			expectJSONResponse: false,
 		},
 	}
 
-	// Iterate over test cases
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			// Create a request
 			var requestBody io.Reader
 			if tc.inputBody != "" {
 				requestBody = strings.NewReader(tc.inputBody)
@@ -114,7 +111,6 @@ func TestFormatJSONHandler(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Could not create request: %v", err)
 			}
-			// Set content type for POST requests with bodies
 			if tc.method == http.MethodPost && tc.inputBody != "" {
 				req.Header.Set("Content-Type", "application/json")
 			}
@@ -122,19 +118,15 @@ func TestFormatJSONHandler(t *testing.T) {
 			// Create a ResponseRecorder to record the response
 			rr := httptest.NewRecorder()
 
-			// Create an HTTP handler from our function
 			handler := http.HandlerFunc(formatJSONHandler)
 
-			// Serve the HTTP request to our handler
 			handler.ServeHTTP(rr, req)
 
-			// Check the status code
 			if status := rr.Code; status != tc.expectedStatusCode {
 				t.Errorf("handler returned wrong status code: got %v want %v",
 					status, tc.expectedStatusCode)
 			}
 
-			// Check the response body
 			// Trim whitespace for non-JSON error messages for robustness
 			responseBody := rr.Body.String()
 			expectedBody := tc.expectedBody
